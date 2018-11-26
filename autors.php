@@ -7,15 +7,25 @@
     <title>Autors BBDD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-    *{
+        *{
         font-family: Arial;
         text-align: left;
-    }
-    input, button, submit {
+        }
+        button, submit {
         border:none;
         background-color: white;
         font-weight: bold;
         font-size: 16pt;
+        }
+        .pagines {
+            width: 40px;
+            float: left;
+        }
+        .numeropagina {
+            margin-left: 5px;
+            width: 40px;
+            float: left;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -27,7 +37,61 @@ $mysqli = new mysqli();
 $mysqli->connect("localhost", "root", "alex", "biblioteca");
 $mysqli->set_charset("utf8");
 $currentPage = 1;
-if(isset($_POST["hiddenpagina"])){
+$count = 0;
+$offset = 0;
+$numberofrows = 20;
+
+//
+
+//
+
+$query = "";
+if (isset($_POST["cercaNom"])) {
+    if ($_POST["cercaNom"] != "") {
+        $count = 0;
+        $queryContador = "SELECT COUNT(*) as total FROM AUTORS WHERE NOM_AUT LIKE '%" . $_POST["cercaNom"] . "%'";
+        $resultat = $mysqli->query($queryContador) or die($queryContador);
+        if ($cursor = $resultat->fetch_assoc()) {
+            $count = $cursor["total"];
+            echo $count;
+        }
+        $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS WHERE NOM_AUT LIKE '%" . $_POST["cercaNom"] . "%' ORDER by $orderby LIMIT $offset,$numberofrows";
+        print_r($_POST["cercaNom"]);
+    } else if ($_POST["cercaId"] != "") {
+        $count = 0;
+        $queryContador = "SELECT COUNT(*) as total FROM AUTORS WHERE ID_AUT = " . $_POST["cercaId"];
+        $resultat = $mysqli->query($queryContador) or die($queryContador);
+        if ($cursor = $resultat->fetch_assoc()) {
+            $count = $cursor["total"];
+            echo $count;
+        }
+        $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS WHERE ID_AUT = " . $_POST["cercaId"] . " ORDER by $orderby LIMIT $offset,$numberofrows";
+    }
+} else {
+    $count = 0;
+    $queryContador = "SELECT COUNT(*) as total FROM AUTORS";
+    $resultat = $mysqli->query($queryContador) or die($queryContador);
+    if ($cursor = $resultat->fetch_assoc()) {
+        $count = $cursor["total"];
+        echo $count;
+    }
+    $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS ORDER by $orderby LIMIT $offset,$numberofrows";
+}
+
+if (isset($_POST["anterior"])) {
+    if ($currentPage > 1) {
+        $offset = $offset - $numberofrows;
+        $currentPage--;
+    }
+}
+if (isset($_POST["posterior"])) {
+    if ($currentPage < ($count / $numberofrows)) {
+        $offset = $offset + $numberofrows;
+        $currentPage++;
+    }
+}
+
+if (isset($_POST["hiddenpagina"])) {
     $currentPage = $_POST["hiddenpagina"];
 }
 if (isset($_POST["id_aut_desc"])) {
@@ -43,53 +107,22 @@ if (isset($_POST["nom_aut_asc"])) {
 }
 $numberofrows = 20;
 $offset = 0;
-if(isset($_POST["hiddenoffset"])){
+if (isset($_POST["hiddenoffset"])) {
     $offset = $_POST["hiddenoffset"];
 }
-$count = 0;
-$queryContador = "SELECT COUNT(*) as total FROM AUTORS";
-$resultat = $mysqli->query($queryContador) or die($queryContador);
-if ($cursor = $resultat->fetch_assoc()) {
-    $count = $cursor["total"];
-}
-
-if(isset($_POST["anterior"])){
-    if($currentPage > 1){
-        $offset = $offset - $numberofrows;
-        $currentPage--;
-    }
-}
-echo $currentPage;
-if(isset($_POST["posterior"])){
-    if($currentPage < ($count / $numberofrows)){
-        $offset = $offset + $numberofrows;
-        $currentPage++;
-    }
-}
-echo $currentPage;
-
-$query = "SELECT ID_AUT, NOM_AUT FROM AUTORS ORDER by $orderby LIMIT $offset,$numberofrows";
-if ($cursor = $mysqli->query($query)) {
+if ($cursor = $mysqli->query($query) OR DIE($query)) {
     /* fetch associative array */
-    echo "<table>";
-    echo "<tr>";
     echo '<form action="autors.php" method="post">';
-    echo "<td>";
+    echo "<input type='hidden' name='ordre' value='$orderby'>";
+    echo "<label for='cercaNom'>Nom:</label>";
+    echo "<input type='text' name='cercaNom'><br>";
+    echo "<label for='cercaId'>ID:</label>";
+    echo "<input type='text' name='cercaId'><br>";
     echo '<button type="submit" name="id_aut_desc">CODI DESCENDENT</button>';
-    echo "</td>";
-    echo "<td>";
     echo '<button type="submit" name="id_aut_asc">CODI ASCENDENT</button>';
-    echo "</td>";
-    echo "<tr>";
-    echo "<td>";
     echo '<button type="submit" name="nom_aut_desc">NOM DESCENDENT</button>';
-    echo "</td>";
-    echo "<td>";
     echo '<button type="submit" name="nom_aut_asc">NOM ASCENDENT</button>';
-    echo "</td>";
-    echo "</tr>";
-    echo "</form>";
-    echo "</tr>";
+    echo "<table>";
     echo "<tr>";
     echo '<td><p>ID AUTOR</p></td>';
     echo '<td><p>NOM AUTOR</p></td>';
@@ -102,12 +135,11 @@ if ($cursor = $mysqli->query($query)) {
     }
     echo "</table>";
     echo "<div>";
-    echo "<form action='autors.php' method='post'>";
     echo "<input type='hidden' name='hiddenoffset' value='$offset'>";
     echo "<input type='hidden' name='hiddenpagina' value='$currentPage'>";
-    echo "<input type='submit' name='anterior' value='&laquo'>";
-    echo "<p class='numeropagina'>$currentPage</p>";
-    echo "<input type='submit' name='posterior' value='&raquo'>";
+    echo "<input type='submit' name='anterior' value='&laquo' class='pagines'>";
+    echo "<p class='numeropagina'>$currentPage/$count</p>";
+    echo "<input type='submit' name='posterior' value='&raquo' class='pagines'>";
     echo "</form>";
     echo "</div>";
 }
