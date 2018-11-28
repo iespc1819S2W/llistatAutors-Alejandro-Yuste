@@ -48,7 +48,7 @@ if (isset($_POST["pagina"])) {
 
 //------- RECOGE LA BUSQUEDA -------
 if(isset($_POST["cerca"])){
-$cerca = $_POST["cerca"];
+$cerca = $mysqli -> real_escape_string($_POST["cerca"]);
 }
 
 
