@@ -17,9 +17,33 @@
         font-weight: bold;
         font-size: 16pt;
         }
+        .general {
+            margin: 0 auto;
+            width: 50vw;
+        }
+        .taula {
+            margin: 5vh auto;
+        }
+        .afegir {
+            margin: 0 auto;
+            width: 35vw;
+            border: 1px solid black;
+        }
+        .taula tr:first-child td {
+            font-size: 15pt;
+            font-weight: bold;
+            text-align: center;
+        }
+        .formulari {
+            text-align: center;
+        }
+        td {
+            padding: 1vw;
+            width: 15vw;
+            border: 1px solid black;
+        }
         .pagines {
-            width: 40px;
-            float: left;
+            text-align: center;
         }
         .numeropagina {
             margin-left: 5px;
@@ -130,7 +154,8 @@ if(isset($_POST["botocerca"])){
     </script>
 </head>
 <body>
-<form action="autors-segon.php" method="post">
+<div class="general">
+<form action="autors-segon.php" method="post" class="formulari">
 <input type="text" name="cerca" value="<?=$cerca?>">
 <input type="submit" name="botocerca" value="Cerca"><br>
 <input type="hidden" name="pagina" value="<?=$currentPage?>">
@@ -143,7 +168,7 @@ if(isset($_POST["botocerca"])){
 <input type="submit" name="posterior" value="&raquo">
 <input type="submit" name="darrer" value="&raquo&raquo">
 </form>
-    <table>
+    <table class="taula">
         <tr>
         <td>CODI</td>
         <td>NOM</td>
@@ -159,8 +184,12 @@ if ($cursor = $mysqli->query($query) or die($query)) {
 }
 ?>
 <tr>
-<td><?=$currentPage?>/<?=$totalPagines?><td>
+<td colspan="2" class="pagines"><?=$currentPage?>/<?=$totalPagines?></td>
 </tr>
     </table>
+    <div class="afegir">
+        Afegir
+    </div>
+    </div>
 </body>
 </html>
