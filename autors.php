@@ -28,8 +28,7 @@
             margin-top: 5px;
         }
     </style>
-</head>
-<body>
+    <script>
     <?php
 echo "<h1>AUTORS</h1>";
 $orderby = "ID_AUT ASC";
@@ -37,113 +36,131 @@ $mysqli = new mysqli();
 $mysqli->connect("localhost", "root", "alex", "biblioteca");
 $mysqli->set_charset("utf8");
 $currentPage = 1;
-$count = 0;
-$offset = 0;
+$totalPagines = 0;
 $numberofrows = 20;
+$offset = 0;
+$cerca = "";
 
-//
+//------ RECOGE LA PAGINA -------
+if (isset($_POST["pagina"])) {
+    $currentPage = $_POST["pagina"];
+}
 
-//
+//------- RECOGE LA BUSQUEDA -------
+if(isset($_POST["cerca"])){
+$cerca = $_POST["cerca"];
+}
 
-$query = "";
-if (isset($_POST["cercaNom"])) {
-    if ($_POST["cercaNom"] != "") {
-        $count = 0;
-        $queryContador = "SELECT COUNT(*) as total FROM AUTORS WHERE NOM_AUT LIKE '%" . $_POST["cercaNom"] . "%'";
-        $resultat = $mysqli->query($queryContador) or die($queryContador);
-        if ($cursor = $resultat->fetch_assoc()) {
-            $count = $cursor["total"];
-            echo $count;
-        }
-        $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS WHERE NOM_AUT LIKE '%" . $_POST["cercaNom"] . "%' ORDER by $orderby LIMIT $offset,$numberofrows";
-        print_r($_POST["cercaNom"]);
-    } else if ($_POST["cercaId"] != "") {
-        $count = 0;
-        $queryContador = "SELECT COUNT(*) as total FROM AUTORS WHERE ID_AUT = " . $_POST["cercaId"];
-        $resultat = $mysqli->query($queryContador) or die($queryContador);
-        if ($cursor = $resultat->fetch_assoc()) {
-            $count = $cursor["total"];
-            echo $count;
-        }
-        $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS WHERE ID_AUT = " . $_POST["cercaId"] . " ORDER by $orderby LIMIT $offset,$numberofrows";
-    }
+
+//------------- CONTADOR -----------------------------------------------
+if($_POST["cerca"] != ""){
+    $queryContador = "SELECT COUNT(*) as total FROM AUTORS WHERE ID_AUT='".$_POST['cerca']."' OR NOM_AUT LIKE '%".$_POST["cerca"]."%'";
+    $resultat = $mysqli->query($queryContador) or die($queryContador);
+    if ($cursor = $resultat->fetch_assoc()) {
+        $totalPagines = ceil($cursor["total"] / $numberofrows);
+    }  
 } else {
-    $count = 0;
     $queryContador = "SELECT COUNT(*) as total FROM AUTORS";
     $resultat = $mysqli->query($queryContador) or die($queryContador);
     if ($cursor = $resultat->fetch_assoc()) {
-        $count = $cursor["total"];
-        echo $count;
-    }
-    $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS ORDER by $orderby LIMIT $offset,$numberofrows";
+        $totalPagines = ceil($cursor["total"] / $numberofrows);
+    } 
 }
 
+//----------------------------------------------------------------------
+
+
+// BOTONES ANTES Y DESPUÉS------------------
 if (isset($_POST["anterior"])) {
     if ($currentPage > 1) {
-        $offset = $offset - $numberofrows;
         $currentPage--;
     }
 }
 if (isset($_POST["posterior"])) {
-    if ($currentPage < ($count / $numberofrows)) {
-        $offset = $offset + $numberofrows;
+    if ($currentPage < $totalPagines) {
         $currentPage++;
     }
 }
+if (isset($_POST["primer"])) {
+        $currentPage = 1;
+}
 
-if (isset($_POST["hiddenpagina"])) {
-    $currentPage = $_POST["hiddenpagina"];
+if (isset($_POST["darrer"])) {
+    $currentPage = $totalPagines;
+}
+
+//--------------------------------------------
+
+
+// EL OFFSET ÉS IGUAL AL NUMERO DE FILAS QUE ENSEÑO POR EL NUMERO DE PAGINA
+$offset = $numberofrows * ($currentPage -1);
+//--------------------------------------------
+
+
+//----------- BOTONES ORDENAR ----------------
+if (isset($_POST["id_aut_asc"])) {
+    $currentPage = 1;
+    $orderby = "ID_AUT ASC";
 }
 if (isset($_POST["id_aut_desc"])) {
+    $currentPage = 1;
     $orderby = "ID_AUT DESC";
 }
 
 if (isset($_POST["nom_aut_desc"])) {
+    $currentPage = 1;
     $orderby = "NOM_AUT DESC";
 }
 
 if (isset($_POST["nom_aut_asc"])) {
+    $currentPage = 1;
     $orderby = "NOM_AUT ASC";
 }
-$numberofrows = 20;
-$offset = 0;
-if (isset($_POST["hiddenoffset"])) {
-    $offset = $_POST["hiddenoffset"];
+//-------------------------------------------------
+
+//----------------- MIRO SI HAGO LA QUERY POR LA BUSQUEDA O NORMAL ---------
+if(isset($_POST["botocerca"])){
+    $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS WHERE ID_AUT ='".$_POST['cerca']."' OR NOM_AUT LIKE '%".$_POST["cerca"]."%' ORDER BY $orderby LIMIT $offset,$numberofrows";
+} else {
+    $query = "SELECT ID_AUT, NOM_AUT FROM AUTORS WHERE ID_AUT ='".$_POST['cerca']."' OR NOM_AUT LIKE '%".$_POST["cerca"]."%' ORDER BY $orderby LIMIT $offset,$numberofrows";
 }
-if ($cursor = $mysqli->query($query) OR DIE($query)) {
-    /* fetch associative array */
-    echo '<form action="autors.php" method="post">';
-    echo "<input type='hidden' name='ordre' value='$orderby'>";
-    echo "<label for='cercaNom'>Nom:</label>";
-    echo "<input type='text' name='cercaNom'><br>";
-    echo "<label for='cercaId'>ID:</label>";
-    echo "<input type='text' name='cercaId'><br>";
-    echo '<button type="submit" name="id_aut_desc">CODI DESCENDENT</button>';
-    echo '<button type="submit" name="id_aut_asc">CODI ASCENDENT</button>';
-    echo '<button type="submit" name="nom_aut_desc">NOM DESCENDENT</button>';
-    echo '<button type="submit" name="nom_aut_asc">NOM ASCENDENT</button>';
-    echo "<table>";
-    echo "<tr>";
-    echo '<td><p>ID AUTOR</p></td>';
-    echo '<td><p>NOM AUTOR</p></td>';
-    echo "</tr>";
+//---------------------------------------------------------------------------
+
+?>
+    </script>
+</head>
+<body>
+<form action="autors-segon.php" method="post">
+<input type="text" name="cerca" value="<?=$cerca?>">
+<input type="submit" name="botocerca" value="Cerca"><br>
+<input type="hidden" name="pagina" value="<?=$currentPage?>">
+<button type="submit" name="id_aut_desc">CODI DESCENDENT</button>
+<button type="submit" name="id_aut_asc">CODI ASCENDENT</button>
+<button type="submit" name="nom_aut_desc">NOM DESCENDENT</button>
+<button type="submit" name="nom_aut_asc">NOM ASCENDENT</button><br>
+<input type="submit" name="primer" value="&laquo&laquo">
+<input type="submit" name="anterior" value="&laquo">
+<input type="submit" name="posterior" value="&raquo">
+<input type="submit" name="darrer" value="&raquo&raquo">
+</form>
+    <table>
+        <tr>
+        <td>CODI</td>
+        <td>NOM</td>
+        </tr>
+        <?php
+if ($cursor = $mysqli->query($query) or die($query)) {
     while ($row = $cursor->fetch_assoc()) {
         echo "<tr>";
         echo "<td>" . $row["ID_AUT"] . "</td>";
         echo "<td>" . $row["NOM_AUT"] . "</td>";
         echo "</tr>";
     }
-    echo "</table>";
-    echo "<div>";
-    echo "<input type='hidden' name='hiddenoffset' value='$offset'>";
-    echo "<input type='hidden' name='hiddenpagina' value='$currentPage'>";
-    echo "<input type='submit' name='anterior' value='&laquo' class='pagines'>";
-    echo "<p class='numeropagina'>$currentPage/$count</p>";
-    echo "<input type='submit' name='posterior' value='&raquo' class='pagines'>";
-    echo "</form>";
-    echo "</div>";
 }
-
 ?>
+<tr>
+<td><?=$currentPage?>/<?=$totalPagines?><td>
+</tr>
+    </table>
 </body>
 </html>
