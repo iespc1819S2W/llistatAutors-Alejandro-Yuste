@@ -1,0 +1,62 @@
+*{
+    font-family: Arial;
+    text-align: left;
+    }
+    button, submit, .botoCerca {
+    background-color: lightgrey;
+    font-weight: bold;
+    font-size: 16pt;
+    }
+    .general {
+        margin: 0 auto;
+        width: 50vw;
+    }
+    .taula {
+        margin: 3vh auto;
+        border-collapse: collapse;
+    }
+    .afegir-out {
+        margin: 0 auto;
+        width: 35vw;
+    }
+    .taula tr:first-child td {
+        font-size: 15pt;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .taula tr td:first-child {
+        text-align: center;
+    }
+    
+    .taula tr td:nth-child(3) {
+        text-align: center;
+    }
+
+    .formulari {
+        text-align: center;
+    }
+    td {
+        padding: 1vw;
+        width: 15vw;
+        border: 1px solid black;
+    }
+    .pagines {
+        text-align: center;
+    }
+    .numeropagina {
+        margin-left: 5px;
+        width: 40px;
+        float: left;
+        margin-top: 5px;
+    }
+    .afegir {
+        float: left;
+        margin: 0vh 0vw 1vh 2vw;
+    }
+    .botoTaula {
+        font-size: 11pt;
+    }
+    .taula tr td:nth-child(4) button:nth-child(2) {
+        margin-left: 2px;
+    }
